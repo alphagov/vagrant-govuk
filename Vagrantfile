@@ -66,6 +66,10 @@ Vagrant.configure("2") do |config|
       }
 
       c.vm.provider :virtualbox do |vb|
+        if config.respond_to? :cache
+          config.cache.auto_detect = true
+        end
+
         modifyvm_args = ['modifyvm', :id]
 
         # Mitigate boot hangs.
