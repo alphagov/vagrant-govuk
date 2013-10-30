@@ -114,6 +114,7 @@ def vagrant_config(config, version)
       else
         c.vm.synced_folder "..", "/var/govuk", :nfs => true
         c.vm.synced_folder "../puppet/extdata", "/tmp/vagrant-puppet/extdata"
+        c.vm.synced_folder "../puppet/hieradata", "/tmp/vagrant-puppet/hieradata"
       end
 
       # Additional shared folders for Puppet Master nodes.
@@ -135,6 +136,7 @@ def vagrant_config(config, version)
           "../puppet/modules",
           "../puppet/vendor/modules",
         ]
+        puppet.hiera_config_path = "../puppet/hiera.yml"
         puppet.options = ["--environment", "vagrant"]
         puppet.facter = {
           :govuk_class => node_opts["class"],
