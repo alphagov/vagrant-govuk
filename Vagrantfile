@@ -1,4 +1,5 @@
 require 'json'
+require 'yaml'
 
 min_required_vagrant_version = '1.2.3'
 
@@ -51,13 +52,61 @@ def nodes_from_json
   nodes
 end
 
+# Load node definitions from the YAML file used by vcloud-tools
+def nodes_from_yaml
+  #Expects the yaml definitions to be in the directory below
+  yaml_dir = File.expand_path('../../govuk-provisioning/production/vapps_definition/', __FILE__)
+  unless File.exists?(yaml_dir)
+    puts "Unable to find nodes in 'govuk-provisioning' repo"
+    puts
+    return {}
+  end
+  
+
+  yaml_files = Dir.glob(
+    File.join(yaml_dir, "*.yaml")
+  )
+
+  yaml_nodes = Hash[ yaml_files.flat_map { |yaml_file|
+      vapp_sets = YAML::load(File.read(yaml_file))["vdcs"][0]['vapp_sets']
+      vapp_sets.map{ |vapp_set|
+        
+        vapp = vapp_set["vapps"][0]
+        zone = vapp["networks"][0].downcase 
+        name = vapp["name"] + "."  + zone
+        #Build the node, parsing the yam file as required
+        node = {}
+        node["role"] = "client"
+        node["ip"] = vapp["vm"]["network_connections"][0]["ip_address"]
+        node["zone"] = zone
+        
+        if  vapp.has_key?("name")        
+            node["vm_name"] = vapp["name"]
+        elsif
+            puts "No name found"
+            next
+        end
+        node["class"] = vapp["vm"]["bootstrap"]["vars"]["class"]
+        if vapp["vm"].has_key?("extra_disks") and !vapp["vm"]["extra_disks"].nil?
+            node["extra_disks"] = vapp["vm"]["extra_disks"]
+        end
+        
+        [name, node]
+      }
+      
+    }
+  ]
+  yaml_nodes
+           
+end
+
 if Vagrant::VERSION < min_required_vagrant_version
   $stderr.puts "ERROR: Puppet now requires Vagrant version >=#{min_required_vagrant_version}. Please upgrade.\n"
   exit 1
 end
 
 Vagrant.configure("2") do |config|
-  nodes_from_json.each do |node_name, node_opts|
+  nodes_from_yaml.each do |node_name, node_opts|
     config.vm.define node_name do |c|
       box_name, box_url = get_box(
         node_opts["box_dist"],
@@ -83,8 +132,25 @@ Vagrant.configure("2") do |config|
       if node_opts.has_key?("memory")
         modifyvm_args << "--memory" << node_opts["memory"]
       end
+      
+      c.vm.provider(:virtualbox) { |vb| 
+        vb.customize(modifyvm_args)
+        #Adding some code to check if the VM needs extra disks 
+        
+        if node_opts.has_key?("extra_disks") and !node_opts["extra_disks"].nil?
+            i = 0
+            for disk in node_opts["extra_disks"] do
+                file_to_disk = "/tmp/exra_disk_" + node_opts["vm_name"] + i.to_s + ".vdi"
+                i += 1
+                #Default Disk size
+                size = 512
+        
+                vb.customize(['createhd', '--filename', file_to_disk, '--size', size,  "--format", "vdi"])
+                vb.customize(['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk])
+            end
+        end
+      }
 
-      c.vm.provider(:virtualbox) { |vb| vb.customize(modifyvm_args) }
       c.vm.synced_folder "..", "/var/govuk", :nfs => true
       c.vm.synced_folder "../puppet/extdata", "/tmp/vagrant-puppet/extdata"
 
