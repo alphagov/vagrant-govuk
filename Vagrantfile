@@ -26,6 +26,12 @@ if Vagrant::VERSION < min_required_vagrant_version
 end
 
 nodes = load_nodes()
+nodes['lxc'] = {
+  'ip'       => '172.16.13.10',
+  'memory'   => 1024,
+  'box_dist' => 'trusty',
+}
+
 Vagrant.configure("2") do |config|
   # Enable vagrant-cachier if available.
   if Vagrant.has_plugin?("vagrant-cachier")
