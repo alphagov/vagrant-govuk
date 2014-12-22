@@ -10,7 +10,9 @@ def get_box(dist, version, provider)
   dist    ||= "precise"
   version ||= "20141112"
 
-  if provider == "vmware_fusion"
+  if provider == "docker"
+    return "fgrehm/vagrant-ubuntu:#{dist}", nil
+  elsif provider == "vmware_fusion"
     name  = "govuk_dev_#{dist}64_vmware_fusion_#{version}"
   else
     name  = "govuk_dev_#{dist}64_#{version}"
@@ -71,6 +73,15 @@ Vagrant.configure("2") do |config|
           node_opts["box_dist"],
           node_opts["box_version"],
           "vmware_fusion"
+        )
+      end
+
+      c.vm.provider(:docker) do |d, override|
+        override.vm.box = nil
+        d.image, override.vm.box_url = get_box(
+          node_opts["box_dist"],
+          node_opts["box_version"],
+          "docker"
         )
       end
 
