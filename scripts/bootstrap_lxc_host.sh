@@ -11,3 +11,14 @@ if ! which vagrant >/dev/null; then
   sudo -iu vagrant vagrant plugin install vagrant-lxc
   sudo -iu vagrant vagrant plugin install vagrant-cachier
 fi
+
+sudo -iu vagrant bash <<EOS
+  if ! grep -qs VAGRANT_DEFAULT_PROVIDER ~/.bashrc; then
+    cat <<EOF >> ~/.bashrc
+
+export VAGRANT_DEFAULT_PROVIDER="lxc"
+export VAGRANT_GOVUK_NFS="no"
+cd /var/govuk/vagrant-govuk
+EOF
+  fi
+EOS
