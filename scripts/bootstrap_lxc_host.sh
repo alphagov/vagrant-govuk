@@ -4,6 +4,11 @@ set -eu
 apt-get -qq update
 apt-get -qqy install lxc lxc-templates redir cgroup-lite
 
+modprobe ip6_tables
+if ! grep -qsx ip6_tables /etc/modules; then
+  echo ip6_tables >> /etc/modules
+fi
+
 if ! which vagrant >/dev/null; then
   VAGRANT_DEB="vagrant_1.6.5_x86_64.deb"
   wget -q https://dl.bintray.com/mitchellh/vagrant/${VAGRANT_DEB}

@@ -88,6 +88,8 @@ Vagrant.configure("2") do |config|
         lxc.customize "network.ipv4", "#{node_opts['ip']}/16"
         lxc.customize "hook.start", "/var/govuk/vagrant-govuk/scripts/hook_eth1_up.sh"
 
+        lxc.customize "hook.pre-start", "/var/govuk/vagrant-govuk/scripts/hook_ip6_tables.sh"
+
         lxc.container_name = node_name
         override.vm.box, override.vm.box_url = get_box(
           node_opts["box_dist"], nil, "lxc"
