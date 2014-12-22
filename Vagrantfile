@@ -85,14 +85,14 @@ Vagrant.configure("2") do |config|
         )
       end
 
-      if ENV['VAGRANT_GOVUK_NFS'] == "no"
-        c.vm.synced_folder "..", "/var/govuk"
-      else
-        c.vm.synced_folder "..", "/var/govuk", :nfs => true
-      end
+      #if ENV['VAGRANT_GOVUK_NFS'] == "no"
+      #  c.vm.synced_folder "..", "/var/govuk"
+      #else
+      #  c.vm.synced_folder "..", "/var/govuk", :nfs => true
+      #end
 
       # These can't be NFS because OSX won't export overlapping paths.
-      c.vm.synced_folder "../puppet/gpg", "/etc/puppet/gpg"
+      #c.vm.synced_folder "../puppet/gpg", "/etc/puppet/gpg"
       # Additional shared folders for Puppet Master nodes.
       if node_name =~ /^puppetmaster/
         c.vm.synced_folder "../puppet", "/usr/share/puppet/production/current"
