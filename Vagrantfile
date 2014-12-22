@@ -121,6 +121,8 @@ Vagrant.configure("2") do |config|
       else
         # run a script to partition extra disks for lvm if they exist.
         c.vm.provision :shell, :inline => "/var/govuk/puppet/tools/partition-disks"
+        # FIXME: Replace with our own basebox.
+        c.vm.provision :shell, :inline => "/var/govuk/vagrant-govuk/scripts/bootstrap_lxc_guest.sh"
         c.vm.provision :shell, :inline => "ENVIRONMENT=vagrant /var/govuk/puppet/tools/puppet-apply #{ENV['VAGRANT_GOVUK_PUPPET_OPTIONS']}"
       end
     end
