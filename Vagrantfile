@@ -30,6 +30,7 @@ end
 nodes = load_nodes()
 nodes['lxc'] = {
   'ip'       => '172.16.13.10',
+  'cpus'     => 2,
   'memory'   => 1024,
   'box_dist' => 'trusty',
 }
@@ -65,12 +66,18 @@ Vagrant.configure("2") do |config|
           "--natdnshostresolver1", "on",
         ])
 
+        if node_opts.has_key?("cpus")
+          vb.cpus = node_opts["memory"]
+        end
         if node_opts.has_key?("memory")
           vb.memory = node_opts["memory"]
         end
       }
 
       c.vm.provider(:vmware_fusion) do |vf, override|
+        if node_opts.has_key?("cpus")
+          vf.vmx["numvcpus"] = node_opts["cpus"]
+        end
         if node_opts.has_key?("memory")
           vf.vmx["memsize"] = node_opts["memory"]
         end
