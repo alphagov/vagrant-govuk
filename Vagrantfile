@@ -47,20 +47,20 @@ Vagrant.configure("2") do |config|
         :netmask => "255.255.000.000"
       }
 
-      modifyvm_args = ['modifyvm', :id]
+      c.vm.provider(:virtualbox) { |vb|
+        vb.customize([
+          'modifyvm', :id,
+          # Mitigate boot hangs.
+          "--rtcuseutc", "on",
+          # Isolate guests from host networking.
+          "--natdnsproxy1", "on",
+          "--natdnshostresolver1", "on",
+        ])
 
-      # Mitigate boot hangs.
-      modifyvm_args << "--rtcuseutc" << "on"
-
-      # Isolate guests from host networking.
-      modifyvm_args << "--natdnsproxy1" << "on"
-      modifyvm_args << "--natdnshostresolver1" << "on"
-
-      if node_opts.has_key?("memory")
-        modifyvm_args << "--memory" << node_opts["memory"]
-      end
-
-      c.vm.provider(:virtualbox) { |vb| vb.customize(modifyvm_args) }
+        if node_opts.has_key?("memory")
+          vb.memory = node_opts["memory"]
+        end
+      }
 
       c.vm.provider(:vmware_fusion) do |vf, override|
         if node_opts.has_key?("memory")
