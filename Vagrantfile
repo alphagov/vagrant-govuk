@@ -77,6 +77,9 @@ Vagrant.configure("2") do |config|
       end
 
       c.vm.provider(:docker) do |d, override|
+        d.vagrant_vagrantfile = "docker-host/Vagrantfile"
+        d.env = { :PIPEWORK_IP => "#{node_opts['ip']}/16" }
+
         override.vm.box = nil
         d.image, override.vm.box_url = get_box(
           node_opts["box_dist"],

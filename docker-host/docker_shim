@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+set -eu
+
+OUT="$(docker_real $*)"
+
+if [[ $1 == "run" || $1 == "start" ]]; then
+  NAME=$(echo $OUT | tail -n1)
+  IP=$(docker_real inspect --format='{{.Config.Env}}' $NAME | grep -Eo 'PIPEWORK_IP=[^ ]+' | cut -d= -f2)
+
+  if [[ -n "$NAME" && -n "$IP" ]]; then
+    sudo pipework docker0 $NAME $IP
+  fi
+fi
+
+echo "$OUT"
