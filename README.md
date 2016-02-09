@@ -1,3 +1,12 @@
+# The contents of this repository have moved
+
+The contents of this repository were [merged][] into the alphagov/govuk-puppet
+repository.
+
+This repository is no longer maintained.
+
+[merged]: https://github.com/alphagov/govuk-puppet/commit/73fec1e271212babb1f96e350913fd2d395a0ac2
+
 # vagrant-govuk
 
 Vagrant node definitions for GOV.UK
