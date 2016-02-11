@@ -1,6 +1,11 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+puts 'This Vagrantfile has been moved to the Puppet repository'
+puts 'https://github.com/alphagov/govuk-puppet/'
+
+exit 1
+
 require_relative 'load_nodes'
 
 min_required_vagrant_version = '1.3.0'
